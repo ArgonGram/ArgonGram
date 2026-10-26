@@ -12,9 +12,10 @@ android.permissions = INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE
 android.archs = arm64-v8a
 android.allow_backup = True
 
-# Жестко фиксируем рабочие версии SDK, чтобы сборщик не брал несовместимые сборки
+# Жестко фиксируем рабочие версии, чтобы сборщик не брал сломанный NDK r28
 android.api = 31
 android.min_api = 21
+android.ndk = 25b
 
 [buildozer]
 log_level = 2
