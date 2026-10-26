@@ -7,9 +7,52 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-pip \
+            build-essential \
+            git \
+            python3-dev \
+            ffmpeg \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libportmidi-dev \
+            libswscale-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            zlib1g-dev \
+            libgstreamer1.0-dev \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            libffi-dev \
+            libssl-dev \
+            autoconf \
+            libtool \
+            pkg-config \
+            unzip \
+            ant \
+            openjdk-17-jdk \
+            jarsigner \
+            zip
+
+      - name: Install Buildozer and Cython
+        run: |
+          pip install --upgrade pip
+          pip install cython==0.29.36 buildozer
 
       - name: Generate buildozer.spec
         run: |
@@ -33,10 +76,8 @@ jobs:
           EOF
 
       - name: Build APK with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        with:
-          workdir: .
-          buildozer_version: master
+        run: |
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
