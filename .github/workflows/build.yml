@@ -17,6 +17,16 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v4
+        with:
+          path: |
+            .buildozer
+            /home/runner/.buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}-${{ hashFiles('sdt.py') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -26,13 +36,15 @@ jobs:
         run: |
           SDK_DIR="/home/runner/.buildozer/android/platform/android-sdk"
           mkdir -p $SDK_DIR/cmdline-tools
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-          unzip -q cmdline-tools.zip -d temp_tools
-          mkdir -p $SDK_DIR/cmdline-tools/latest
-          mv temp_tools/cmdline-tools/* $SDK_DIR/cmdline-tools/latest/
-          rm -rf cmdline-tools.zip temp_tools
-          ln -s $SDK_DIR/cmdline-tools/latest $SDK_DIR/tools
-          yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR --licenses
+          if [ ! -f "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" ]; then
+            wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+            unzip -q cmdline-tools.zip -d temp_tools
+            mkdir -p $SDK_DIR/cmdline-tools/latest
+            mv temp_tools/cmdline-tools/* $SDK_DIR/cmdline-tools/latest/
+            rm -rf cmdline-tools.zip temp_tools
+          fi
+          ln -sfn $SDK_DIR/cmdline-tools/latest $SDK_DIR/tools
+          yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR --licenses || true
           $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR "platform-tools" "platforms;android-33" "build-tools;33.0.2" "build-tools;37.0.0" || true
 
       - name: Install Buildozer and Cython
